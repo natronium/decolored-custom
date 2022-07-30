@@ -120,7 +120,7 @@ body {
 
 @media screen and (min-width: 900px) {
     body {
-        background: url('../img/web-background.jpg');
+        background: url('web-background.jpg');
         background-attachment: fixed;
     }
     body.dark {
@@ -308,7 +308,7 @@ tr.centered {
 }
 
 .page-bg-05 {
-    background-image: url("../img/page-bg-noise-05.png");
+    background-image: url("page-bg-noise-05.png");
 }
 
 .page-bg-06 {
