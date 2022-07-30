@@ -63,7 +63,9 @@
             document.getElementById('initial-col').innerText = convert(c1);
             document.getElementById('initial-row').innerText = convert(c2);
 
-            var colorNames = ['R', 'G', 'B', 'Y', 'M'];
+            //changing colorNames in this way doesn't mess up the shuffling
+            //var colorNames = ['🟥','🟩','🟦','🟨','🟪'];
+            var colorNames = ['R','G','B','Y','M'];
             var subsets = [];
             for (var i = 0; i < 32; i++)
             {
@@ -75,6 +77,21 @@
                 subsets.push(colors);
             }
             rnd.shuffleFisherYates(subsets);
+            // /!\ NB: directly modifying subsets like this *will* mess up the shuffling /!\
+            // /!\ resulting in an invalid chart!! which is why we build a second array  /!\
+            var textSubsets = [];
+            for (let colors of subsets) {
+                if(colors.length == 5){
+                    colors = ['ANY'];
+                } else if (colors.length == 4){
+                    // https://stackoverflow.com/a/1885569
+                    // replace `colors` with '!' + the one missing color
+
+                    colors = colorNames.filter(name => !colors.includes(name));
+                    colors.unshift('NOT ');
+                }
+                textSubsets.push(colors);
+            }
 
             var svg, paths, missingCells, pointedAt = new Array(36);
             do
@@ -84,12 +101,15 @@
                 missingCells = [];
 
                 var ixs = [0, 1, 2, 3, 4, 5];
+
+                //X axis labels (across top)
                 rnd.shuffleFisherYates(ixs);
                 for (var i = 0; i < 5; i++)
                     svg += `<text x='${5 + 15*ixs[i]}' y='-2.5' font-size='4'>${colorNames[i]}</text>`;
                 for (var i = 0; i < 6; i++)
                     missingCells.push(ixs[5] + 6*i);
 
+                //Y axis labels (across left side, vertically)
                 rnd.shuffleFisherYates(ixs);
                 for (var i = 0; i < 5; i++)
                     svg += `<text x='-2.5' y='${5 + 15*ixs[i]}' font-size='4' text-anchor='end'>${colorNames[i]}</text>`;
@@ -133,12 +153,14 @@
                     dirs = dirs.slice(0, 2);    // 0 = no, 1 = yes
 
                     var sbstIx = ix - missingCells.filter(cel => cel < ix).length;
-                    svg += `<text transform='translate(${5 + 15*x}, ${5 + 15*y}) rotate(-45)' x='0' y='1'>${subsets[sbstIx].join('')}</text>`;
+                    //actual text in flowchart cells, based on subsets generated earlier
+                    svg += `<text transform='translate(${5 + 15*x}, ${5 + 15*y}) rotate(-45)' x='0' y='1'>${textSubsets[sbstIx].join('')}</text>`;
                     if (subsets[sbstIx].length === 0)
                         dirs[1] = null;
                     else if (subsets[sbstIx].length === 5)
                         dirs[0] = null;
 
+                    //flowchart boxes /w arrows
                     var path = `M${x*15} ${y*15}`;
                     path += (dirs.indexOf(0) >= 0) ? 'h3l2-2 2 2h3' : 'h10';
                     path += (dirs.indexOf(1) >= 0) ? 'v3l2 2-2 2v3' : 'v10';
