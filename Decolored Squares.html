@@ -89,6 +89,8 @@
 
                     colors = colorNames.filter(name => !colors.includes(name));
                     colors.unshift('NOT ');
+                } else if (colors.length == 0){
+                    colors = ['NO'];
                 }
                 textSubsets.push(colors);
             }
